@@ -1,0 +1,76 @@
+.applicationFormContainer {
+    max-width: 100%;
+    margin: 20px auto;
+    background-color: #ffffff;
+    padding: 50px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.loginForm .formRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.formRow label {
+    flex: 1;
+    text-align: left;
+    margin-right: 5px;
+}
+
+.input {
+    flex: 2;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.input::placeholder {
+    color: #888;
+}
+
+.formActions {
+    display: flex;
+    justify-content: center;
+}
+
+
+.button {
+    background-color: #0056a6;
+    color: #fff;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+    width: 30%;
+}
+
+.button:hover,
+.button:disabled {
+    background-color: #004a94;
+}
+
+.topMenu {
+    display: flex;
+    justify-content: space-between; /* Adjusted for spacing out logo and links */
+    align-items: center; /* Vertically center align items */
+    padding: 30px;
+    background-color: rgba(224, 233, 245, 1);
+    color: #333F5B;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: Adds shadow for depth */
+
+}
+
+.logo {
+    max-height: 50px; /* Limits the logo height */
+    margin-right: 20px; /* Adds some space between logo and links */
+}
+.error {
+    color: red; /* Przykład */
+    margin-top: 10px;
+}

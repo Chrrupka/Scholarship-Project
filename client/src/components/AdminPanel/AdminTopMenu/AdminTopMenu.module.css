@@ -1,0 +1,31 @@
+/* AdminTopMenu.module.css */
+@import '../../../styles/CommonStyles.css';
+
+.topMenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    background-color: rgba(224, 233, 245, 1);
+    color: #333F5B;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+}
+
+.logo {
+    max-height: 50px;
+    margin-right: 20px;
+}
+
+.link {
+    text-decoration: none;
+    color: #333F5B;
+    padding: 5px 15px;
+    transition: background-color 0.3s;
+
+}
+
+.link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}

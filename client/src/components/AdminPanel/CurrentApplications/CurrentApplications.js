@@ -4,33 +4,71 @@ import AdminTopMenu from "../AdminTopMenu/AdminTopMenu";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import {useAuth} from "../../../hooks/useAuth";
-
-const applicationsData = [
-    { id: 1, date: '2023-01-01', type: 'Typee A', status: 'BPeending', name: 'AJohen Doe', albumNumber: '0021' },
-    { id: 2, date: '2023-02-15', type: 'Type B', status: 'CAcecepted', name: 'ZJanee Smith', albumNumber: '0202' },
-    { id: 1, date: '2023-01-01', type: 'Type A', status: 'Pending', name: 'BJohn Doe', albumNumber: '001' },
-    { id: 2, date: '2023-02-15', type: 'Type B', status: 'Accepted', name: 'Jane Smith', albumNumber: '002' },
-    // więcej danych...
-];
+import axios from "axios";
+import ApiInfo from "../../../utils/apiInfo";
+import {useNavigate} from "react-router-dom";
 
 const CurrentApplications = () => {
     useAuth();
-
-    const [applications, setApplications] = useState(applicationsData);
+    const navigate = useNavigate();
+    const [applications, setApplications] = useState([]);
     const [sortConfig, setSortConfig] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        let sortedAndFilteredData = [...applicationsData];
-        if (searchQuery) {
-            sortedAndFilteredData = sortedAndFilteredData.filter(application => {
-                return Object.values(application).some(field =>
-                    field.toString().toLowerCase().includes(searchQuery.toLowerCase())
-                );
-            });
-        }
+        const fetchData = async () => {
+            try {
+                const authToken = sessionStorage.getItem('authToken');
+                const config = { headers: { Authorization: `Bearer ${authToken}` } };
+                // Fetch applications
+                const applicationsResponse = await axios.get(`${ApiInfo.baseUrl}${ApiInfo.applicationEndpoints.all}`, config);
+
+                if (applicationsResponse.data) {
+                    const filteredApplications = applicationsResponse.data.filter(app =>
+                        app.status === 'W takcie rozpatrywania' || app.status === 'Wysłany'
+                    );
+                    const studentsResponse = await axios.get(`${ApiInfo.baseUrl}/students`, config);
+                    const detailsResponse = await axios.get(`${ApiInfo.baseUrl}/details`, config);
+
+                    const students = studentsResponse.data;
+                    const details = detailsResponse.data;
+
+
+                    const applicationsWithStudentInfo = filteredApplications.map(application => {
+
+                        const student = students.find(s => {
+                            return s.applicationId === application.id;
+                        });
+                        const studentDetails = details.find(s => {
+                            return s.applicationId === application.id;
+                        }); // Adapt this line to match how you access the details
+
+                        const fullName = student ? `${student.surname} ${student.name}` : 'Nie przypisany';
+                        const specialization = studentDetails ? studentDetails.specialization : 'Nie przypisana';
+
+                        return {
+                            ...application,
+                            album_id: student ? student.album_id : 'Nie przypisany',
+                            fullName: fullName,
+                            specialization: specialization
+
+                        };
+                    });
+
+                    setApplications(applicationsWithStudentInfo);
+                }
+            } catch (error) {
+                console.error("Error fetching applications:", error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        let sortedApplications = [...applications];
+
         if (sortConfig !== null) {
-            sortedAndFilteredData.sort((a, b) => {
+            sortedApplications.sort((a, b) => {
                 if (a[sortConfig.key] < b[sortConfig.key]) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
                 }
@@ -41,7 +79,15 @@ const CurrentApplications = () => {
             });
         }
 
-        setApplications(sortedAndFilteredData);
+        if (searchQuery) {
+            sortedApplications = sortedApplications.filter(application =>
+                Object.values(application).some(value =>
+                    value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+                )
+            );
+        }
+
+        setApplications(sortedApplications);
     }, [sortConfig, searchQuery]);
 
     const requestSort = (key) => {
@@ -49,9 +95,9 @@ const CurrentApplications = () => {
         if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
             direction = 'descending';
         } else if (sortConfig && sortConfig.key === key && sortConfig.direction === 'descending') {
-            direction = null;
+            direction = null; // Reset sort when clicking third time
         }
-        setSortConfig(direction ? { key, direction } : null);
+        setSortConfig({ key, direction });
     };
 
     const handleSearch = (event) => {
@@ -59,56 +105,63 @@ const CurrentApplications = () => {
     };
 
     const getSortIcon = (key) => {
-        if (sortConfig && sortConfig.key === key) {
-            return sortConfig.direction === 'ascending' ?
-                <FontAwesomeIcon icon={faSortUp} /> : <FontAwesomeIcon icon={faSortDown} />;
+        if (!sortConfig || sortConfig.key !== key) {
+            return <FontAwesomeIcon icon={faSort} />;
         }
-        return <FontAwesomeIcon icon={faSort} />;
+        return sortConfig.direction === 'ascending' ? <FontAwesomeIcon icon={faSortUp} /> : <FontAwesomeIcon icon={faSortDown} />;
+    };
+    const handleViewDetails = (id) => {
+        navigate(`/admin_details/${id}`);
     };
 
     return (
-        <div className="application-container">
+        <div className="admin-application-container">
             <AdminTopMenu/>
             <div className={styles.container}>
-                <h2>Wnioski stypendialne</h2>
+                <h2>Aktualne wnioski stypendialne</h2>
                 <input
                     type="text"
-                    placeholder="Search by any field..."
+                    placeholder="Szukaj..."
                     value={searchQuery}
                     onChange={handleSearch}
                     className={styles.searchInput}
                 />
+
                 <table className={styles.table}>
                     <thead>
                     <tr>
-                        <th className={styles.th} onClick={() => requestSort('date')}>
-                            Date {getSortIcon('date')}
-                        </th>
-                        <th className={styles.th} onClick={() => requestSort('type')}>
-                            Type {getSortIcon('type')}
-                        </th>
-                        <th className={styles.th} onClick={() => requestSort('status')}>
-                            Status {getSortIcon('status')}
-                        </th>
-                        <th className={styles.th} onClick={() => requestSort('name')}>
-                            Name {getSortIcon('name')}
-                        </th>
-                        <th className={styles.th} onClick={() => requestSort('albumNumber')}>
-                            Album Number {getSortIcon('albumNumber')}
-                        </th>
-                        <th className={styles.th}>Actions</th>
+                        <th className={styles.th} onClick={() => requestSort('id')}>Id
+                            stypendium {getSortIcon('id')}</th>
+                        <th className={styles.th} onClick={() => requestSort('date')}>Data {getSortIcon('date')}</th>
+                        <th className={styles.th} onClick={() => requestSort('fullName')}>Imię i
+                            Nazwisko {getSortIcon('fullName')}</th>
+                        <th className={styles.th} onClick={() => requestSort('student.album_id')}>Numer
+                            albumu {getSortIcon('student.album_id')}</th>
+                        <th className={styles.th}
+                            onClick={() => requestSort('specialization')}>Specjalizacja {getSortIcon('specialization')}</th>
+
+                        <th className={styles.th} onClick={() => requestSort('type')}>Typ {getSortIcon('type')}</th>
+                        <th className={styles.th}
+                            onClick={() => requestSort('status')}>Status {getSortIcon('status')}</th>
+
+                        <th className={styles.th}>Akcje</th>
                     </tr>
                     </thead>
                     <tbody>
                     {applications.map((application, index) => (
                         <tr key={index}>
-                            <td>{application.date}</td>
+                            <td>{application.id}</td>
+                            <td>{new Date(application.createdAt).toLocaleDateString()}</td>
+                            <td>{application.fullName}</td>
+                            <td>{application.album_id}</td>
+                            <td>{application.specialization}</td>
                             <td>{application.type}</td>
                             <td>{application.status}</td>
-                            <td>{application.name}</td>
-                            <td>{application.albumNumber}</td>
+
                             <td>
-                                <button className={styles.button}>View</button>
+                                <button className={styles.button}
+                                        onClick={() => handleViewDetails(application.id)}>Zobacz
+                                </button>
                             </td>
                         </tr>
                     ))}
@@ -118,5 +171,4 @@ const CurrentApplications = () => {
         </div>
     );
 };
-
 export default CurrentApplications;

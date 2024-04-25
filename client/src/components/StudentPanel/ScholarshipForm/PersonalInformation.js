@@ -25,7 +25,7 @@ const PersonalInformation = ({ formik, handleNext }) => {
                     <input
                         type="radio"
                         name="type"
-                        value="rectors"
+                        value="Rektorskie"
                         checked={formik.values.type === 'Rektorskie'}
                         onChange={formik.handleChange}
                     />
@@ -35,8 +35,8 @@ const PersonalInformation = ({ formik, handleNext }) => {
                     <input
                         type="radio"
                         name="type"
-                        value="social"
-                        checked={formik.values.type === 'Socjalne'}
+                        value="Socialne"
+                        checked={formik.values.type === 'Socialne'}
                         onChange={formik.handleChange}
                     />
                     Socjalne
@@ -45,7 +45,7 @@ const PersonalInformation = ({ formik, handleNext }) => {
                     <input
                         type="radio"
                         name="type"
-                        value="forDisabled"
+                        value="Dla niepełnosprawnych"
                         checked={formik.values.type === 'Dla niepełnosprawnych'}
                         onChange={formik.handleChange}
                     />

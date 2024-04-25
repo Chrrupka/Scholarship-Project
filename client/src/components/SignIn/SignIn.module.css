@@ -57,20 +57,20 @@
 
 .topMenu {
     display: flex;
-    justify-content: space-between; /* Adjusted for spacing out logo and links */
-    align-items: center; /* Vertically center align items */
+    justify-content: space-between;
+    align-items: center;
     padding: 30px;
     background-color: rgba(224, 233, 245, 1);
     color: #333F5B;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: Adds shadow for depth */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 
 }
 
 .logo {
-    max-height: 50px; /* Limits the logo height */
-    margin-right: 20px; /* Adds some space between logo and links */
+    max-height: 50px;
+    margin-right: 20px;
 }
 .error {
-    color: red; /* Przykład */
+    color: red;
     margin-top: 10px;
 }

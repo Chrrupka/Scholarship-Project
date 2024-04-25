@@ -1,7 +1,6 @@
-/* AdminArchive.module.css */
 
 .container {
-    text-align: center;
+    text-align: left;
     padding: 30px;
     background-color: var(--background-color);
     border-radius: 0 0 8px 8px;
@@ -13,12 +12,10 @@
     margin: 20px auto;
     border-collapse: separate;
     border-spacing: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-radius: 0 0 8px 8px;
     overflow: hidden;
-    background-color: #ffffff;
     padding-top: 20px;
-
 }
 
 .th, .td {

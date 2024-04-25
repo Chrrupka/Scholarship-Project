@@ -1,4 +1,3 @@
-/* AdminTopMenu.module.css */
 @import '../../../styles/CommonStyles.css';
 
 .topMenu {
@@ -9,6 +8,8 @@
     background-color: rgba(224, 233, 245, 1);
     color: #333F5B;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-size: 20px;
+
 
 }
 
@@ -21,11 +22,17 @@
     text-decoration: none;
     color: #333F5B;
     padding: 5px 15px;
+    display: block;
+    font-weight: normal;
     transition: background-color 0.3s;
 
 }
 
-.link:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
+.activeLink {
+    font-weight: bold;
+    color: #ffffff;
+    text-decoration: none;
+    background-color: #89a9d3;
+    border-radius: 6px;
+    padding: 15px 15px;
 }

@@ -15,24 +15,18 @@ const Status = () => {
     useAuth();
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const authToken = sessionStorage.getItem('authToken');
-                const endpoint = ApiInfo.applicationEndpoints.getByIdAndRemoveAndUpdate.replace('{id}', id);
-                const response = await axios.get(`${ApiInfo.baseUrl}${endpoint}`, {
-                    headers: {
-                        Authorization: `Bearer ${authToken}`
-                    }
-                });
-                // Przypisanie odpowiedzi do stanów
-                setScholarshipData(response.data.app); // Poprawiono na setScholarshipData
-                setScholarshipStudent(response.data.stu[0]); // Założono, że 'stu' zawiera dane studentów
-            } catch (error) {
-                console.error("There was an error fetching the application details:", error);
-            }
-        };
-        fetchData();
-    }, [id]);
+        axios.get(ApiInfo.baseUrl + ApiInfo.applicationEndpoints.all)
+            .then(response => {
+                const filteredData = response.data
+                    .filter(item => item.status === 'Wysłany' || item.status === 'W takcie rozpatrywania')
+                    .slice(0, 3);
+                setScholarshipData(filteredData);
+            })
+            .catch(error => {
+                console.error("There was an error fetching the scholarship data:", error);
+            });
+    }, []);
+
 
     const handleViewDetails = (id) => {
         navigate(`/details/${id}`);
@@ -50,7 +44,6 @@ const Status = () => {
                         <th className={styles.th}>Data</th>
                         <th className={styles.th}>Rodzaj</th>
                         <th className={styles.th}>Status</th>
-                        <th className={styles.th}>Numer albumu</th> {/* Dodano nową kolumnę */}
                         <th className={styles.th}>Akcje</th>
                     </tr>
                     </thead>
@@ -61,7 +54,6 @@ const Status = () => {
                             <td className={styles.td}>{new Date(item.createdAt).toLocaleDateString()}</td>
                             <td className={styles.td}>{item.type}</td>
                             <td className={styles.td}>{item.status}</td>
-                            <td className={styles.td}>{scholarshipStudent.albumNumber}</td> {/* Wyświetlenie numeru albumu */}
                             <td className={styles.td}>
                                 <button className={styles.button}
                                         onClick={() => handleViewDetails(item.id)}>Zobacz

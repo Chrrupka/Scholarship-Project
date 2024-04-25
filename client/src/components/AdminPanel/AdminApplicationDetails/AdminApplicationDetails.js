@@ -1,20 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import styles from './ApplicationDetails.module.css';
-import TopMenu from "../TopMenu/TopMenu";
-import {useNavigate, useParams} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import styles from './AdminApplicationDetails.module.css';
+import AdminTopMenu from "../AdminTopMenu/AdminTopMenu";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "../../../services/axiosConfig";
-import {useAuth} from "../../../hooks/useAuth";
-import ApiInfo from "../../../utils/apiInfo"; // CSS module import
+import { useAuth } from "../../../hooks/useAuth";
+import ApiInfo from "../../../utils/apiInfo";
+import { Modal, Button, Form } from 'react-bootstrap';
 
-const ApplicationDetails = () => {
+const AdminApplicationDetails = () => {
     const { id } = useParams();
-    const navigate = useNavigate(); // Używamy useNavigate tutaj
-
+    const navigate = useNavigate();
     useAuth();
-    const [scholarshipApplication, setScholarshipApplication]=useState([]);
+
+    const [scholarshipApplication, setScholarshipApplication]=useState({});
     const [scholarshipDetails, setScholarshipDetails]=useState([])
     const [scholarshipAttachment, setScholarshipAttachment]=useState([])
     const [scholarshipStudent, setScholarshipStudent]=useState([])
+
+    const [showModal, setShowModal] = useState(false);
+    const [newStatus, setNewStatus] = useState('');
+    const [feedback, setFeedback] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,11 +31,11 @@ const ApplicationDetails = () => {
                         Authorization: `Bearer ${authToken}`
                     }
                 });
-
+                // Przypisanie odpowiedzi do stanów
                 setScholarshipApplication(response.data.app);
-                setScholarshipDetails(response.data.det[0]); // Założenie, że `det` to tablica zawierająca tylko jeden obiekt
+                setScholarshipDetails(response.data.det[0]);
                 setScholarshipAttachment(response.data.att);
-                setScholarshipStudent(response.data.stu[0])// `att` jest już tablicą
+                setScholarshipStudent(response.data.stu[0])
             } catch (error) {
                 console.error("There was an error fetching the application details:", error);
             }
@@ -45,12 +50,33 @@ const ApplicationDetails = () => {
     const handlePrint = () => {
         window.print();
     };
+
+    const handleChangeStatus = () => {
+        setShowModal(true);
+    };
+
+    const saveChanges = async () => {
+        try {
+            const authToken = sessionStorage.getItem('authToken');
+            const endpoint = ApiInfo.applicationEndpoints.updateById.replace('{id}', id);
+            await axios.post(`${ApiInfo.baseUrl}${endpoint}`, {
+                status: newStatus,
+                other_details: feedback
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setShowModal(false);
+            navigate(-1); // refresh or navigate away
+        } catch (error) {
+            console.error("Failed to save changes:", error);
+        }
+    };
     if (!scholarshipApplication) {
         return <div>Loading...</div>;
     }
     return (
         <div className="application-container">
-            <TopMenu/>
+            <AdminTopMenu/>
             <div className={styles.detailsContainer}>
                 <div className={styles.header}>
                     <div className={styles.actions}>
@@ -136,12 +162,39 @@ const ApplicationDetails = () => {
                     </div>
                 </div>
                 <div className={styles.actions}>
-                    <button onClick={handlePrint} className={styles.button}>Drukuj</button>
-
-                    <button className={styles.button}>Złóż wniosek ponownie</button>
+                    <Button onClick={handlePrint} variant="primary" className={styles.button}>Drukuj</Button>
+                    <Button onClick={() => setShowModal(true)} variant="primary" className={styles.button}>Zmień status</Button>
                 </div>
+
+                <Modal show={showModal} onHide={() => setShowModal(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Zmień status aplikacji</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            <Form.Group controlId="statusSelect">
+                                <Form.Label>Status</Form.Label>
+                                <Form.Control as="select" value={newStatus} onChange={e => setNewStatus(e.target.value)}>
+                                    <option value="Wysłany">Wysłany</option>
+                                    <option value="W trakcie rozpatrywania">W trakcie rozpatrywania</option>
+                                    <option value="Odrzucony">Odrzucony</option>
+                                    <option value="Zaakceptowany">Zaakceptowany</option>
+                                </Form.Control>
+                            </Form.Group>
+                            <Form.Group controlId="feedbackTextarea">
+                                <Form.Label>Wpisz informacje dodatkowe</Form.Label>
+                                <Form.Control as="textarea" rows={3} value={feedback} onChange={e => setFeedback(e.target.value)} />
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowModal(false)}>Zakmnij</Button>
+                        <Button variant="primary" onClick={saveChanges}>Zapisz zmiany</Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         </div>
     );
-}
-export default ApplicationDetails;
+};
+
+export default AdminApplicationDetails;

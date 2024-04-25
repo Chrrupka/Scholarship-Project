@@ -32,7 +32,6 @@ const SignIn = () => {
                     console.log("Login success", response.data);
                     sessionStorage.setItem('authToken', response.data.token);
                     //sessionStorage.removeItem()
-// Zapisz token w sessionStorage
                     if(loginData.login === 'admin@gmail.com') {
                         navigate('/admin_applications');
                     } else {

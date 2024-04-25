@@ -31,6 +31,8 @@ function getCurrentValidationSchema(step) {
 const ScholarshipForm = () => {
     useAuth();
     const [step, setStep] = useState(1);
+    const [submissionStatus, setSubmissionStatus] = useState({ success: null, message: '' });
+
 
     const formik = useFormik({
         initialValues: {
@@ -46,7 +48,7 @@ const ScholarshipForm = () => {
             educationLevel: '',
             studySystem: '',
             type:'',
-            status:'Wysłane',
+            status:'Wysłany',
             attachments: null,
         },
 
@@ -68,8 +70,11 @@ const ScholarshipForm = () => {
                 };
 
                 const result = await ApiService.createApplication(applicationPayload);
-                console.log(result);
+                setSubmissionStatus({ success: true, message: 'Formularz został pomyślnie wysłany!' });
+
             } catch (e) {
+                setSubmissionStatus({ success: false, message: 'Wystąpił błąd podczas wysyłania formularza. Spróbuj ponownie.' });
+
                 console.error(e);
             }
         }
@@ -152,6 +157,11 @@ const ScholarshipForm = () => {
                             formik={formik}
                             handlePrevious={handlePrevious}
                         />
+                    )}
+                    {submissionStatus.success !== null && (
+                        <div className={submissionStatus.success ? styles.successMessage : styles.errorMessage}>
+                            {submissionStatus.message}
+                        </div>
                     )}
                 </form>
             </div>

@@ -22,35 +22,40 @@ const AdminArchive = () => {
                 const config = { headers: { Authorization: `Bearer ${authToken}` } };
                 // Fetch applications
                 const applicationsResponse = await axios.get(`${ApiInfo.baseUrl}${ApiInfo.applicationEndpoints.all}`, config);
+
                 if (applicationsResponse.data) {
-                    const applicationsData = applicationsResponse.data;
+                    const filteredApplications = applicationsResponse.data.filter(app =>
+                        app.status === 'Zaakceptowany' || app.status === 'Odrzucony'
+                    );
+                    const studentsResponse = await axios.get(`${ApiInfo.baseUrl}/students`, config);
+                    const detailsResponse = await axios.get(`${ApiInfo.baseUrl}/details`, config);
 
-                    // Assuming all details, students, attachments data are optional and might not exist
-                    const applicationsWithDetails = await Promise.all(applicationsData.map(async (application) => {
-                        try {
-                            const detailsResponse = await axios.get(`${ApiInfo.baseUrl}${ApiInfo.detailsEndpoint.byIdAndUpdateAndDelete.replace('{id}', application.id)}`, config);
-                            const studentResponse = await axios.get(`${ApiInfo.baseUrl}${ApiInfo.studentEndpoint.getByIdAndRemoveAndUpdate.replace('{id}', application.id)}`, config);
-                            const attachmentsResponse = await axios.get(`${ApiInfo.baseUrl}${ApiInfo.attachmentEndpoint.getOrRemove.replace('{id}', application.id)}`, config);
+                    const students = studentsResponse.data;
+                    const details = detailsResponse.data;
 
-                            // Add fetched details to the application object
-                            return {
-                                ...application,
-                                details: detailsResponse.data || {},
-                                student: studentResponse.data || {},
-                                attachments: attachmentsResponse.data || [],
-                            };
-                        } catch (error) {
-                            console.error("Error fetching related data:", error);
-                            return {
-                                ...application,
-                                details: {},
-                                student: {},
-                                attachments: [],
-                            };
-                        }
-                    }));
 
-                    setApplications(applicationsWithDetails);
+                    const applicationsWithStudentInfo = filteredApplications.map(application => {
+
+                        const student = students.find(s => {
+                            return s.applicationId === application.id;
+                        });
+                        const studentDetails = details.find(s => {
+                            return s.applicationId === application.id;
+                        }); // Adapt this line to match how you access the details
+
+                        const fullName = student ? `${student.surname} ${student.name}` : 'Nie przypisany';
+                        const specialization = studentDetails ? studentDetails.specialization : 'Nie przypisana';
+
+                        return {
+                            ...application,
+                            album_id: student ? student.album_id : 'Nie przypisany',
+                            fullName: fullName,
+                            specialization: specialization
+
+                        };
+                    });
+
+                    setApplications(applicationsWithStudentInfo);
                 }
             } catch (error) {
                 console.error("Error fetching applications:", error);
@@ -59,7 +64,6 @@ const AdminArchive = () => {
         fetchData();
     }, []);
 
-    // Funkcje do sortowania i wyszukiwania
     useEffect(() => {
         let sortedApplications = [...applications];
 
@@ -107,11 +111,11 @@ const AdminArchive = () => {
         return sortConfig.direction === 'ascending' ? <FontAwesomeIcon icon={faSortUp} /> : <FontAwesomeIcon icon={faSortDown} />;
     };
     const handleViewDetails = (id) => {
-        navigate(`/details/${id}`);
+        navigate(`/admin_details/${id}`);
     };
 
     return (
-        <div className="application-container">
+        <div className="admin-application-container">
             <AdminTopMenu/>
             <div className={styles.container}>
                 <h2>Archiwalne wnioski stypendialne</h2>
@@ -122,25 +126,38 @@ const AdminArchive = () => {
                     onChange={handleSearch}
                     className={styles.searchInput}
                 />
+
                 <table className={styles.table}>
                     <thead>
                     <tr>
+                        <th className={styles.th} onClick={() => requestSort('id')}>Id
+                            stypendium {getSortIcon('id')}</th>
                         <th className={styles.th} onClick={() => requestSort('date')}>Data {getSortIcon('date')}</th>
+                        <th className={styles.th} onClick={() => requestSort('fullName')}>Imię i
+                            Nazwisko {getSortIcon('fullName')}</th>
+                        <th className={styles.th} onClick={() => requestSort('student.album_id')}>Numer
+                            albumu {getSortIcon('student.album_id')}</th>
+                        <th className={styles.th}
+                            onClick={() => requestSort('specialization')}>Specjalizacja {getSortIcon('specialization')}</th>
+
                         <th className={styles.th} onClick={() => requestSort('type')}>Typ {getSortIcon('type')}</th>
-                        <th className={styles.th} onClick={() => requestSort('status')}>Status {getSortIcon('status')}</th>
-                       {/* <th className={styles.th} onClick={() => requestSort('name')}>Nazwa {getSortIcon('name')}</th>
-                        <th className={styles.th} onClick={() => requestSort('albumNumber')}>Numer albumu {getSortIcon('albumNumber')}</th>*/}
+                        <th className={styles.th}
+                            onClick={() => requestSort('status')}>Status {getSortIcon('status')}</th>
+
                         <th className={styles.th}>Akcje</th>
                     </tr>
                     </thead>
                     <tbody>
                     {applications.map((application, index) => (
                         <tr key={index}>
+                            <td>{application.id}</td>
                             <td>{new Date(application.createdAt).toLocaleDateString()}</td>
+                            <td>{application.fullName}</td>
+                            <td>{application.album_id}</td>
+                            <td>{application.specialization}</td>
                             <td>{application.type}</td>
                             <td>{application.status}</td>
-                            {/*<td>{application.name}</td>
-                            <td>{application.albumNumber}</td>*/}
+
                             <td>
                                 <button className={styles.button}
                                         onClick={() => handleViewDetails(application.id)}>Zobacz

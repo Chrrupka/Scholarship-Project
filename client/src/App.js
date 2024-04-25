@@ -10,7 +10,8 @@ import Status from "./components/StudentPanel/Status/Status";
 import Archive from "./components/StudentPanel/Archive/Archive";
 import CurrentApplications from "./components/AdminPanel/CurrentApplications/CurrentApplications";
 import AdminArchive from "./components/AdminPanel/AdminArchive/AdminArchive";
-import AdminApplicationDetails from "./components/AdminPanel/CurrentApplications/ApplicationDetails/AdminApplicationDetails";
+import AdminApplicationDetails from "./components/AdminPanel/AdminApplicationDetails/AdminApplicationDetails";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 function App() {

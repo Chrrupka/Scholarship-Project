@@ -13,6 +13,7 @@ const News = () => {
 
             <TopMenu/>
             <div className={styles.newsContainer}>
+
                 <h1>POMOC MATERIALNA</h1>
                 <h2>dla studentów Akademii Tarnowskiej</h2>
                 <h3>w roku akademickim 2023/2024</h3>

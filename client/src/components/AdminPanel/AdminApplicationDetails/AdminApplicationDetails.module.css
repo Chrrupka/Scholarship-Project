@@ -29,6 +29,7 @@
 
 .date, .status {
     font-size: 1.1rem;
+    color: #58666e;
     margin-top: 5px;
     padding-left: 20px;
 }
@@ -123,7 +124,6 @@
     background-color: #004a94;
 }
 
-
 .button:disabled {
     background-color: #004a94;
 }
@@ -154,5 +154,38 @@
     .button {
         width: 100%;
         margin-top: 10px;
+    }
+}
+@media print {
+    .actions,
+    .TopMenu,
+    .inneElementyKtoreNieMajaBycDrukowane {
+        display: none !important;
+    }
+
+    .detailsContainer,
+    .details {
+        text-align: left;
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .label,
+    .dynamic {
+        font-size: 10pt;
+    }
+
+    .detailsContainer {
+        page-break-after: auto;
+    }
+
+
+    .title,
+    .date,
+    .status,
+    .detailItem,
+    .attachmentList {
+        display: block !important;
     }
 }
